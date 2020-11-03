@@ -1,0 +1,1 @@
+# rancher-v2-logging-examples
