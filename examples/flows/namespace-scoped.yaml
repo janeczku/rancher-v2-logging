@@ -1,0 +1,17 @@
+# Example flow to capture all logs from a group
+# of namespaces, e.g. those owned by a specific cluster tenant
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: Flow
+metadata:
+  name: tenant-foo-logs
+spec:
+  match:
+  - select:
+      namespaces:
+        - tenant-foo-frontend
+        - tenant-foo-backend
+  - exclude:
+      # Exclude Istio sidekick containers
+      container_names:
+      - istio-init
+      - istio-proxy

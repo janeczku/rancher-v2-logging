@@ -1,0 +1,46 @@
+# Example for sending logs to an S3 object store
+# for archiving purposes
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: ClusterOutput
+metadata:
+  name: s3-archive-output
+  namespace: cattle-logging-system
+spec:
+  s3:
+    aws_key_id:
+      valueFrom:
+        secretKeyRef:
+          # Secret must exist in the ClusterOutput namespace
+          name: minio-client-creds
+          key: accessKey
+    aws_sec_key:
+      valueFrom:
+        secretKeyRef:
+          name: minio-client-creds
+          key: secretKey
+    # Custom endpoint for object stores other than AWS S3
+    s3_endpoint: https://play.min.io
+    s3_bucket: k8s-logs-archive
+    s3_region: eu-central-1
+    # Using a folder hierarchy to group daily logs
+    path: 'cluster-1/%Y/%m/%d/'
+    # The string value format of time_slice is determined by the buffer timekey
+    # For '1h' it will look something like this: 2020102911, ie. YYYYMMDDHH
+    # Using the custom object key format below, the absolute object path will be something like:
+    # cluster-1/%Y/%m/%d/2020102911_01.log.gz
+    s3_object_key_format: '%{path}%{time_slice}_%{index}.log.%{file_extension}'
+    store_as: gzip
+    buffer:
+      type: file
+      # Must be lower than the object store HTTP payload limit
+      # Must take into account available bandwidth and API rate limits of the store
+      # E.g. lower chunk limit size will result in more API queries
+      chunk_limit_size: 256m
+      # Log events will be grouped in chunks covering the time range of 1h
+      # Using larger timekey reduces the overall number of objects in the store
+      # Since we are archiving we don't care too much about latency
+      timekey: 1h
+      # Delay flushing of the chunk for 5 minutes after the hour
+      timekey_wait: 5m
+      # Use UTC to format the time_slice placeholder
+      timekey_use_utc: true

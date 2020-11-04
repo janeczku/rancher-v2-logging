@@ -1,0 +1,29 @@
+# Example flow to parse and ship NGINX ingress controller
+# access logs as structured data
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: ClusterFlow
+metadata:
+  name: ingress-access-logs
+  namespace: cattle-logging-system
+spec:
+  filters:
+  - parser:
+      remove_key_name_field: true
+      reserve_data: true
+      inject_key_prefix: nginx.
+      parse:
+        type: multi_format
+        patterns:
+        - format: regexp
+          time_key: time
+          time_format: '%d/%b/%Y:%H:%M:%S %z'
+          # NGINX ingress controller uses a different log format than standard NGINX server
+          # Ref: https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/log-format/
+          expression: '^(?<remote>[^ ]*) (?<real_ip>[^\]]*) (?<user>[^ ]+) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^\"]*) +\S*)?" (?<status>\d+) (?<bytes_sent>\d+) "(?<referrer>[^ ]*)" "(?<user_agent>[^\"]*)" (?<request_length>\d+) (?<request_time>[\d.]+) \[(?<proxy_upstream_name>[^\]]*)\] \[(?<proxy_alternative_upstream_name>[^ ]*)\] (?<upstream_addr>[^ ]*) (?<upstream_response_length>\d+) (?<upstream_response_time>[\d.]+) (?<upstream_status>\d+) (?<request_id>[^ ]*)'
+        - format: none
+  match:
+  - select:
+      labels:
+        app: ingress-nginx
+  globalOutputRefs:
+    - "elasticsearch-output"

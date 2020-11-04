@@ -1,0 +1,69 @@
+# An example Elasticsearch output configuration
+# incorporating best practices for fluentd logging
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: ClusterOutput
+metadata:
+  name: elasticsearch-output
+  namespace: cattle-logging-system
+  labels:
+    someLabel: foo
+spec:
+  elasticsearch:
+    host: elastic-cluster.acme.com
+    port: 443
+    scheme: https
+    ssl_verify: true
+    user: username
+    password:
+      valueFrom:
+        secretKeyRef:
+         name: elasticsearch-log-writer-credentials
+         key: password
+    ca_file:
+      valueFrom:
+        secretKeyRef:
+          # Note: Secret must exist in the ClusterOutput namespace
+          name: elasticsearch-log-writer-credentials
+          key: ca.pem
+    # Create daily index (e.g. "cluster_foo-2020_10_22")
+    logstash_format: true
+    logstash_prefix: cluster_foo
+    logstash_dateformat: '%Y_%m_%d'
+    include_tag_key: true
+    reconnect_on_error: true
+    # Disables node discovery such that only the endpoints specified in the
+    # `host` option are used to send bulk log data to Elasticsearch.
+    # Recommended when Elasticsearch cluster is behind a reverse-proxy.
+    sniffer_class_name: 'Fluent::Plugin::ElasticsearchSimpleSnifferAdd'
+    # This fixes "deprecated" warnings log spam on Elasticsearch 7.x
+    suppress_type_name: true
+    buffer:
+      # File buffer is recommended buffer type for production
+      type: file
+      # Determines the HTTP payload size for forwarding logs to Elasticsearch 
+      # Default values are 8M for memory-based / 256M for file-based buffer
+      # Ideal setting should be a function of log volume and bandwidth/latency towards the Elasticsearch server
+      # Setting this value too low might result in API throttling and buffer filling and/or OS file handle starvation
+      # Widely used values are in the range of 4 - 16M
+      chunk_limit_size: 8M
+      # Should only be changed if the Elasticsearch service restricts HTTP payloads to a lower size
+      # than the default 20MB. A setting of "-1" will disable message splitting and may improve fluentd performance.
+      # bulk_message_request_threshold: 20M 
+      # Max size the buffer can occupy on disk
+      total_limit_size: 5G
+      # Interval flush mode provides good control over latency/throughput of log shipping
+      flush_mode: interval
+      # Smaller interval -> Reduces the latency between logs emitted and stored in the logstore
+      # Higher interval -> Improves log data throughput 
+      flush_interval: 5s
+      # Multiple threads improve event flushing performance
+      # and reduce the risk of buffer filling when logs are ingested
+      # faster than they are flushed
+      flush_thread_count: 4
+      # Recommended when buffer is properly sized and/or use case has lower requirement for log retention
+      # (defaults to 'throw_exception')
+      overflow_action: drop_oldest_chunk
+      # Don't discard log events when flushing fails
+      retry_forever: true
+      retry_type: exponential_backoff
+      retry_max_interval: 60s

@@ -1,0 +1,11 @@
+# Dump all cluster logs into s3 object store for archiving
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: ClusterFlow
+metadata:
+  name: archive-all-logs-in-s3
+  namespace: cattle-logging-system
+spec:
+  match:
+    - select: {}
+  globalOutputRefs:
+    - "s3-archive-output"

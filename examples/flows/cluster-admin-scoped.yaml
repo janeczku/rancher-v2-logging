@@ -1,0 +1,25 @@
+# Example flow to capture and ship logs
+# of concern for cluster operations
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: ClusterFlow
+metadata:
+  name: cluster-admin-scoped
+  namespace: cattle-logging-system
+spec:
+  match:
+  - select:
+      namespaces:
+      - cattle-system
+      - cattle-logging-system
+      - cattle-resources-system
+      - fleet-system
+      - ingress-nginx
+      - istio-system
+      - kube-system
+      # TBC ...
+  - exclude:
+      labels:
+        # We are going to capture those with a separate flow
+        app: ingress-nginx
+  globalOutputRefs:
+    - "elasticsearch-output"
