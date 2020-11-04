@@ -9,7 +9,7 @@ configuration examples implementing recommended settings for production, migrati
 
 [Migration Notes](#migration-notes)    
 
-[Mastering commin logging challenges with Logging v2](#mastering-common-logging-challenges-with-logging-v2)
+[Mastering common logging challenges with Logging v2](#mastering-common-logging-challenges-with-logging-v2)
 
 
 ## Configuration examples
