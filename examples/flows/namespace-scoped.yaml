@@ -1,9 +1,10 @@
 # Example flow to capture all logs from a group
 # of namespaces, e.g. those owned by a specific cluster tenant
 apiVersion: logging.banzaicloud.io/v1beta1
-kind: Flow
+kind: ClusterFlow
 metadata:
   name: tenant-foo-logs
+  namespace: cattle-logging-system
 spec:
   match:
   - select:
