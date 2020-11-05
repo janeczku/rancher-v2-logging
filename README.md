@@ -1,4 +1,4 @@
-# Rancher 2.5 Logging Best Practices and Troubleshootig
+# Rancher 2.5 Logging Best Practices
 
 Rancher 2.5 ships with a new logging integration based on the [Banzai Logging Operator](https://github.com/banzaicloud/logging-operator). This repository contains a few
 configuration examples implementing recommended settings for production, migration notes as well as best practices and troubleshooting with a focus on Elasticsearch log storage.
@@ -9,8 +9,7 @@ configuration examples implementing recommended settings for production, migrati
 
 [Migration Notes](#migration-notes)    
 
-[Mastering common logging challenges with Logging v2](#mastering-common-logging-challenges-with-logging-v2)
-
+[Logging v2 Best Practices](#logging-v2-best-practices)
 
 ## Configuration examples
 
@@ -87,7 +86,7 @@ spec:
 
 While the correct namespace will be selected automatically when configuring a ClusterOutput in the Cluster Explorer UI, that's currently not the case for `ClusterFlow` so extra care needs to be taken when creating those.
 
-## Mastering common logging challenges with Logging v2
+## Logging v2 Best Practices
 
 Logging v2 makes it very easy to address common challenges of shipping logs from Kubernetes and implement best practices. Specificallyit allwos us to access lower level Fluentd configuration that was 
 not exposed in Rancher's previous Logging implementation.
