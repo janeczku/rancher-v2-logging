@@ -1,4 +1,4 @@
-# Rancher 2.5 Logging Guidance
+# Rancher 2.5 Logging Best Practices and Troubleshootig
 
 Rancher 2.5 ships with a new logging integration based on the [Banzai Logging Operator](https://github.com/banzaicloud/logging-operator). This repository contains a few
 configuration examples implementing recommended settings for production, migration notes as well as best practices and troubleshooting with a focus on Elasticsearch log storage.
